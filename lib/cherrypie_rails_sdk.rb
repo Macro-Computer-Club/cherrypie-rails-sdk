@@ -8,7 +8,7 @@ module CherrypieRailsSdk
   class Middleware
     include Concurrent::Async
 
-    def initialize(app, api_key, identity_function, api_url: "http://api.cherrypie.app")
+    def initialize(app, api_key, identity_function, api_url: "https://api.cherrypie.app")
       super()
       @app = app
       @api_key = api_key
@@ -75,6 +75,7 @@ module CherrypieRailsSdk
 
       uri = URI("#{@api_url}/v1/logs")
       http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
       cherrypie_request = Net::HTTP::Post.new(
         uri.request_uri,
         {
