@@ -5,7 +5,7 @@ require_relative "cherrypie_rails_sdk/version"
 module CherrypieRailsSdk
   class Error < StandardError; end
   class Middleware
-    def initialize(app, api_key, identity_function, api_url: "http://api.cherrypie.app")
+    def initialize(app, api_key, identity_function, api_url: "https://api.cherrypie.app")
       @app = app
       @api_key = api_key
       @api_url = api_url
