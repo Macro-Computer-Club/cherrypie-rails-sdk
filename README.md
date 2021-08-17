@@ -7,7 +7,7 @@ Cherrypie Rails SDK.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'cherrypie-rails-sdk', '~> 0.2.6'
+gem 'cherrypie-rails-sdk', '~> 0.2.7'
 ```
 
 And then execute:
