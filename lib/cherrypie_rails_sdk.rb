@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 
 require_relative "cherrypie_rails_sdk/version"
+require 'concurrent'
 
 module CherrypieRailsSdk
   class Error < StandardError; end
   class Middleware
-    def initialize(app, api_key, identity_function, api_url: "https://api.cherrypie.app")
+    include Concurrent::Async
+
+    def initialize(app, api_key, identity_function, api_url: "http://api.cherrypie.app")
+      super()
       @app = app
       @api_key = api_key
       @api_url = api_url
@@ -40,7 +44,11 @@ module CherrypieRailsSdk
         "statusCode"=> status,
       }
     end
-  
+
+    def _send_log(http, request)
+      http.request(request)
+    end
+
     def _call env
       request_started_on = Time.now
       @status, @headers, @response = @app.call(env)
@@ -67,7 +75,7 @@ module CherrypieRailsSdk
 
       uri = URI("#{@api_url}/v1/logs")
       http = Net::HTTP.new(uri.host, uri.port)
-      request = Net::HTTP::Post.new(
+      cherrypie_request = Net::HTTP::Post.new(
         uri.request_uri,
         {
           'Content-Type' => 'application/json',
@@ -75,10 +83,10 @@ module CherrypieRailsSdk
           'Accept'=>'application/json',
         }
       )
-      request.body = payload
+      cherrypie_request.body = payload
       # Only log non-300 statuses.
       if !(@status >= 300 && @status <= 399)
-        cherrypie_response = http.request(request)
+        cherrypie_response = self.async._send_log(http, cherrypie_request)
       end
       [@status, @headers, @response]
     end
